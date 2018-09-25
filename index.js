@@ -6,11 +6,12 @@ function gaussian(mean, sigma) {
 
 function draw(canvas, lines) {
   const ctx = canvas.getContext("2d");
-  
+  ctx.fillStyle = "white";
   var distance = -200;
   for (var i = 0; i < lines.length; i++) {
     const line = lines[i];
     var y = canvas.height / 2 + distance;
+    ctx.beginPath(); 
     ctx.moveTo(0, y);
     var n = 40;
     for (var j = 0; j < n; j++) {
@@ -20,6 +21,11 @@ function draw(canvas, lines) {
         y + line(nx) * -20);
     }
     ctx.stroke();
+    ctx.lineTo(canvas.width, y);
+    ctx.lineTo(canvas.width, canvas.height);
+    ctx.lineTo(0, canvas.height);
+    ctx.closePath();
+    ctx.fill();
 
     distance += 400 / lines.length;
   }
