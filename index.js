@@ -5,30 +5,25 @@ function ndc(out, v) {
   return vec3.scale(out, out, 1.0 / v[3]);
 }
 
-// Projects a vec4 using a mat4 and then scales to ndc
-function project(out, v, M) {
-  const clip = vec3.transformMat4(vec4.create(), v, M);
-  return ndc(out, clip);
+function extend(v) {
+  return vec4.fromValues(v[0], v[1], v[2], 1);
 }
 
-// compute the inverse transponate
-function normal_transform(out, M) {
-  mat4.inverse(out, M);
-  return mat4.transpose(tmp, tmp);
+// Projects a vec4 using a mat4 and then scales to ndc
+function project(out, v, M) {
+  const clip = vec4.transformMat4(vec4.create(), v, M);
+  return ndc(out, clip);
 }
 
 // Projects a 3D line to a 2D line
 function project_line(line, M) {
   var p = vec3.create();
-  project(p, line.p, M);
-  
-  var M_normal = mat4.create();
-  normal_transform(M_normal, M);
+  project(p, extend(line.p), M);
   
   // TODO: How to transform u directly?
   var line_p1 = vec3.add(vec3.create(), line.p, line.u);
   var p1 = vec3.create();
-  project(p1, line_p1, M);
+  project(p1, extend(line_p1), M);
 
   return {
     p: p,
@@ -72,8 +67,8 @@ function render(canvas, camera, scene) {
   console.log(line3d);
 
   // Project line
-  line2d = project_line(line3d, camera.projection);
-
+  const line2d = project_line(line3d, camera.projection);
+  console.log(line2d);
   // Scale line into NDC
 
   // Clip with screen edges
