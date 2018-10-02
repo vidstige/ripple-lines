@@ -53,6 +53,26 @@ function plane_plane_intersection(p1, p2) {
   };
 }
 
+// Axis aligned line line intersection, e.g. x=-1
+function aax_line_line(line, x) {
+  const px = line.p[0], py = line.p[1];
+  const ux = line.u[0], uy = line.u[1];
+  return py + uy * (x - px) / ux;
+}
+
+// Axis aligned line line intersection, e.g. y=-1
+function aay_line_line(line, x) {
+  const px = line.p[0], py = line.p[1];
+  const ux = line.u[0], uy = line.u[1];
+  return px + ux * (y - py) / uy;
+}
+
+function clip_to_ndc(line) {
+  const left = aax_line_line(line, -1);
+  const right = aax_line_line(line, 1);
+  return [left, right];
+}
+
 // camera - camera matrix
 // scene - plane (e.g. y = 0) and height map function f(u, v)
 function render(canvas, camera, scene) {
@@ -72,7 +92,7 @@ function render(canvas, camera, scene) {
   // Scale line into NDC
 
   // Clip with screen edges
-
+  console.log(clip_to_ndc(line2d));
 
 
   /*
