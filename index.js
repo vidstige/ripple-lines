@@ -73,34 +73,44 @@ function clip_to_ndc(line) {
   return {p0: left, p1: right};
 }
 
+function transform_plane(out, plane, M) {
+  var tmp = mat4.create();
+  mat4.invert(tmp, M);
+  mat4.transpose(tmp, tmp);
+  vec4.transformMat4(out, plane, tmp);
+  return out;
+}
+
 // camera - camera matrix
 // scene - plane (e.g. y = 0) and height map function f(u, v)
 function render(canvas, camera, scene) {
   const ctx = canvas.getContext("2d");
- 
-  // Construct plane parallel to camera
-  var z_plane = vec4.fromValues(0, 0, 1, -0.1);
-
-  // Intersect scene plane and z plane
-  // TODO: Transform scene.plane with pose
-  const line3d = plane_plane_intersection(scene.plane, z_plane);  
-  console.log(line3d);
-
-  // Project line
-  const line2d = project_line(line3d, camera.projection);
-  console.log(line2d);
-  
-  // Clip with screen edges
-  const lineSegment = clip_to_ndc(line2d);
-  console.log(lineSegment);
-
   ctx.transform(canvas.width/2, 0, 0, canvas.height/2, canvas.width/2, canvas.height/2);
-  ctx.lineWidth = 2 / canvas.height;
-  ctx.beginPath();
-  ctx.moveTo(lineSegment.p0[0], lineSegment.p0[1]);
-  ctx.lineTo(lineSegment.p1[0], lineSegment.p1[1]);
-  ctx.stroke();
-  
+
+  for (var z = -4; z < 0; z += 0.25) {
+    console.log(z);
+    // Construct plane parallel to camera
+    var z_plane = vec4.fromValues(0, 0, 1, z);
+
+    // Intersect scene plane and z plane
+    const plane = transform_plane(vec4.create(), scene.plane, camera.pose);
+    const line3d = plane_plane_intersection(plane, z_plane);
+    console.log(line3d);
+
+    // Project line
+    const line2d = project_line(line3d, camera.projection);
+    console.log(line2d);
+    
+    // Clip with screen edges
+    const lineSegment = clip_to_ndc(line2d);
+    console.log(lineSegment);
+
+    ctx.lineWidth = 2 / canvas.height;
+    ctx.beginPath();
+    ctx.moveTo(lineSegment.p0[0], lineSegment.p0[1]);
+    ctx.lineTo(lineSegment.p1[0], lineSegment.p1[1]);
+    ctx.stroke();
+  }  
 
 
   /*
@@ -129,7 +139,7 @@ function x2(x, y) {
 
 function ready() {
   var up = vec3.fromValues(0, 1, 0);
-  var eye = vec3.fromValues(0, 0.2, -2);
+  var eye = vec3.fromValues(0, 0.4, -2);
   var center = vec3.fromValues(0, 0, 0);
   var pose = mat4.create();
   mat4.lookAt(pose, eye, center, up);
