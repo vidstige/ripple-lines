@@ -57,20 +57,20 @@ function plane_plane_intersection(p1, p2) {
 function aax_line_line(line, x) {
   const px = line.p[0], py = line.p[1];
   const ux = line.u[0], uy = line.u[1];
-  return py + uy * (x - px) / ux;
+  return vec2.fromValues(x, py + uy * (x - px) / ux);
 }
 
 // Axis aligned line line intersection, e.g. y=-1
 function aay_line_line(line, x) {
   const px = line.p[0], py = line.p[1];
   const ux = line.u[0], uy = line.u[1];
-  return px + ux * (y - py) / uy;
+  return vec2.fromValues(px + ux * (y - py) / uy, y);
 }
 
 function clip_to_ndc(line) {
   const left = aax_line_line(line, -1);
   const right = aax_line_line(line, 1);
-  return [left, right];
+  return {p0: left, p1: right};
 }
 
 // camera - camera matrix
@@ -89,10 +89,18 @@ function render(canvas, camera, scene) {
   // Project line
   const line2d = project_line(line3d, camera.projection);
   console.log(line2d);
-  // Scale line into NDC
-
+  
   // Clip with screen edges
-  console.log(clip_to_ndc(line2d));
+  const lineSegment = clip_to_ndc(line2d);
+  console.log(lineSegment);
+
+  ctx.transform(canvas.width/2, 0, 0, canvas.height/2, canvas.width/2, canvas.height/2);
+  ctx.lineWidth = 2 / canvas.height;
+  ctx.beginPath();
+  ctx.moveTo(lineSegment.p0[0], lineSegment.p0[1]);
+  ctx.lineTo(lineSegment.p1[0], lineSegment.p1[1]);
+  ctx.stroke();
+  
 
 
   /*
