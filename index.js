@@ -21,17 +21,10 @@ function plane_plane_intersection(p1, p2) {
 }
 
 // camera - camera matrix
-// scene - plane (e.g. z = 0) and height map function f(u, v) = z
+// scene - plane (e.g. y = 0) and height map function f(u, v)
 function render(canvas, camera, scene) {
-  // 1. Iterate lines paralell to camera, farthest first
-  //   1.1. Iterate points on line
-  //   1.2. Evaluate heightmap
-  //   1.3. Render line
-  // 2. Profit  
   const ctx = canvas.getContext("2d");
-  var projection = mat4.create();
-  mat4.multiply(projection, camera.K, camera.pose);
-  
+ 
   // Construct plane parallel to camera
   var z_plane = vec4.fromValues(0, 0, 1, -0.1);
 
@@ -42,7 +35,11 @@ function render(canvas, camera, scene) {
 
 
 
-  /*var vertices = [
+
+  /*
+  var projection = mat4.create();
+  mat4.multiply(projection, camera.K, camera.pose);
+  var vertices = [
     vec3.fromValues(0, 0, 0),
     vec3.fromValues(1, 0, 0),
     vec3.fromValues(1, 0, 1),
