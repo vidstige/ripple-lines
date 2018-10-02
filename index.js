@@ -1,3 +1,33 @@
+// scales a clip coordinate (transformed by projection) into 
+// NDC coordinates (vec3). Normally only x and y are used.
+function ndc(out, v) {
+  vec3.copy(out, v);
+  return vec3.scale(out, out, 1.0 / v[3]);
+}
+
+// Projects a vec4 using a mat4 and then scales to ndc
+function project(out, v, M) {
+  const clip = vec3.transformMat4(vec4.create(), v, M);
+  return ndc(out, clip);
+}
+
+// compute the inverse transponate
+function normal_transform(out, M) {
+  mat4.inverse(out, M);
+  return mat4.transpose(tmp, tmp);
+}
+
+// Projects a 3D line to a 2D line
+function project_line(line, M) {
+  var p = vec3.create();
+  project(p, line.p, M);
+  
+  var M_normal = mat4.create();
+  normal_transform(M_normal, M);
+  
+  // TODO: Transform Direction for u - Ignore scale + position
+}
+
 function plane_plane_intersection(p1, p2) {
   const normal1 = vec3.clone(p1);
   const d1 = p1[3];
@@ -29,10 +59,16 @@ function render(canvas, camera, scene) {
   var z_plane = vec4.fromValues(0, 0, 1, -0.1);
 
   // Intersect scene plane and z plane
+  // TODO: Transform scene.plane with pose
   const line3d = plane_plane_intersection(scene.plane, z_plane);  
   console.log(line3d);
 
+  // Project line
+  line2d = project_line(line3d, camera.projection);
 
+  // Scale line into NDC
+
+  // Clip with screen edges
 
 
 
@@ -66,11 +102,11 @@ function ready() {
   var center = vec3.fromValues(0, 0, 0);
   var pose = mat4.create();
   mat4.lookAt(pose, eye, center, up);
-  var K = mat4.create();
-  mat4.perspective(K, 1.3, 640/480, 0.1, 2);
+  var projection = mat4.create();
+  mat4.perspective(projection, 1.3, 640/480, 0.1, 2);
 
   const canvas = document.getElementById('target');
-  const camera = {K, pose};
+  const camera = {projection, pose};
   const scene = {heightmap: x2, plane: vec4.fromValues(0, 1, 0, 0)};
   render(canvas, camera, scene);
 }
