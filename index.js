@@ -25,7 +25,15 @@ function project_line(line, M) {
   var M_normal = mat4.create();
   normal_transform(M_normal, M);
   
-  // TODO: Transform Direction for u - Ignore scale + position
+  // TODO: How to transform u directly?
+  var line_p1 = vec3.add(vec3.create(), line.p, line.u);
+  var p1 = vec3.create();
+  project(p1, line_p1, M);
+
+  return {
+    p: p,
+    u: vec3.subtract(vec3.create(), p1, p)
+  };
 }
 
 function plane_plane_intersection(p1, p2) {
