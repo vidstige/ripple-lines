@@ -81,6 +81,22 @@ function transform_plane(out, plane, M) {
   return out;
 }
 
+function backproject(screen, camera) {
+  // Ray in clip coordinates
+  const ray_clip = vec3.fromValues(screen[0], screen[1], -1, 1);
+
+  var total = mat4.create();
+  mat4.multiply(total, camera.projection, camera.pose);
+  
+  var total_inv = mat4.create();
+  mat4.invert(total_inv, total);
+  //const ray_eye = inverse(total) * ray_clip;
+  const ray_world = vec4.create();
+  vec3.transformMat4(ray_world, ray_clip, total_inv);
+
+  return ray_world;
+}
+
 // camera - camera matrix
 // scene - plane (e.g. y = 0) and height map function f(u, v)
 function render(canvas, camera, scene) {
@@ -88,34 +104,34 @@ function render(canvas, camera, scene) {
   ctx.transform(canvas.width/2, 0, 0, canvas.height/2, canvas.width/2, canvas.height/2);
 
   for (var z = -4; z < 0; z += 0.25) {
-    console.log(z);
     // Construct plane parallel to camera
     var z_plane = vec4.fromValues(0, 0, 1, z);
 
     // Intersect scene plane and z plane
     const plane = transform_plane(vec4.create(), scene.plane, camera.pose);
     const line3d = plane_plane_intersection(plane, z_plane);
-    console.log(line3d);
 
     // Project line
     const line2d = project_line(line3d, camera.projection);
-    console.log(line2d);
     
     // Clip with screen edges
     const lineSegment = clip_to_ndc(line2d);
-    console.log(lineSegment);
+    console.log(lineSegment.p0, lineSegment.p1);
 
     ctx.lineWidth = 2 / canvas.height;
     ctx.beginPath();
     ctx.moveTo(lineSegment.p0[0], lineSegment.p0[1]);
     ctx.lineTo(lineSegment.p1[0], lineSegment.p1[1]);
     ctx.stroke();
+
+    const ray = backproject(lineSegment.p0, camera);
+
   }  
 
 
   /*
   var projection = mat4.create();
-  mat4.multiply(projection, camera.K, camera.pose);
+  mat4.multiply(projection, camera.projection, camera.pose);
   var vertices = [
     vec3.fromValues(0, 0, 0),
     vec3.fromValues(1, 0, 0),
