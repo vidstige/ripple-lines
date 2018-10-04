@@ -117,6 +117,7 @@ function backproject(screen, camera) {
 function render(canvas, camera, scene) {
   const ctx = canvas.getContext("2d");
   ctx.transform(canvas.width/2, 0, 0, canvas.height/2, canvas.width/2, canvas.height/2);
+  ctx.lineWidth = 1 / canvas.height;
 
   for (var z = -4; z < 0; z += 0.25) {
     // Construct plane parallel to camera
@@ -133,11 +134,10 @@ function render(canvas, camera, scene) {
     const lineSegment = clip_to_ndc(line2d);
     //console.log(lineSegment.p0, lineSegment.p1);
 
-    ctx.lineWidth = 2 / canvas.height;
-    ctx.beginPath();
+    /*ctx.beginPath();
     ctx.moveTo(lineSegment.p0[0], lineSegment.p0[1]);
     ctx.lineTo(lineSegment.p1[0], lineSegment.p1[1]);
-    ctx.stroke();
+    ctx.stroke();*/
 
     const ray0 = backproject(lineSegment.p0, camera);
     const ray1 = backproject(lineSegment.p1, camera);
@@ -145,11 +145,30 @@ function render(canvas, camera, scene) {
     const p0 = ray_plane(vec3.create(), ray0, scene.plane);
     const p1 = ray_plane(vec3.create(), ray1, scene.plane);
 
-    // HACK: Just grav uv from x,z in projected point
+    // HACK: Just grab uv from x,z in projected point
     // Only works when plane = [0, 1, 0, 0]. uv should be 
     // projected onto orthonogal 3d U, V vectors _in_ the plane.
     const uv0 = vec2.fromValues(p0[0], p0[2]);
     const uv1 = vec2.fromValues(p1[0], p1[2]);
+
+    // interpolate linesegment and uv pairs
+    ctx.beginPath();
+    var p = vec2.create();
+    var uv = vec2.create();
+
+    var h = scene.heightmap(uv0[0], uv0[1]);
+    ctx.moveTo(lineSegment.p0[0], lineSegment.p0[1] - h);
+
+    const n = 64;
+    for (var j = 0; j < n; j++) {
+      const t = (j + 1) / n;
+      vec2.lerp(p, lineSegment.p0, lineSegment.p1, t);
+      vec2.lerp(uv, uv0, uv1, t);
+      h = scene.heightmap(uv[0], uv[1]);
+      //console.log(uv[0], uv[1], "=", h);
+      ctx.lineTo(p[0], p[1] - h);
+    }
+    ctx.stroke();
   }  
 
 
@@ -174,7 +193,7 @@ function render(canvas, camera, scene) {
 }
 
 function x2(x, y) {
-  return 1 / (x*x + y*y);
+  return 0.5 - x*x*10;
 }
 
 function ready() {
