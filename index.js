@@ -81,6 +81,15 @@ function transform_plane(out, plane, M) {
   return out;
 }
 
+// Computes ray-plane intersection
+function ray_plane(out, ray, plane) {
+  const plane_normal = vec3.copy(vec3.create(), plane);
+  const d = plane[3];
+  //const t = -( N.O + d ) / ( N.D );
+  const t = -( vec3.dot(plane_normal, ray.o) + d ) / vec3.dot(plane_normal, ray.d);
+  return vec3.scaleAndAdd(out, ray.o, ray.d, t);
+}
+
 function backproject(screen, camera) {
   // Ray in clip coordinates
   const ray_clip = vec3.fromValues(screen[0], screen[1], -1, 1);
@@ -94,7 +103,13 @@ function backproject(screen, camera) {
   const ray_world = vec4.create();
   vec3.transformMat4(ray_world, ray_clip, total_inv);
 
-  return ray_world;
+  const origin_world = vec3.transformMat4(vec3.create(), vec3.fromValues(0, 0, 0), total_inv);
+
+  // drop w and normalize
+  return {
+    o: origin_world,
+    d: vec3.normalize(vec3.create(), ray_world),
+  } 
 }
 
 // camera - camera matrix
@@ -116,7 +131,7 @@ function render(canvas, camera, scene) {
     
     // Clip with screen edges
     const lineSegment = clip_to_ndc(line2d);
-    console.log(lineSegment.p0, lineSegment.p1);
+    //console.log(lineSegment.p0, lineSegment.p1);
 
     ctx.lineWidth = 2 / canvas.height;
     ctx.beginPath();
@@ -124,8 +139,17 @@ function render(canvas, camera, scene) {
     ctx.lineTo(lineSegment.p1[0], lineSegment.p1[1]);
     ctx.stroke();
 
-    const ray = backproject(lineSegment.p0, camera);
+    const ray0 = backproject(lineSegment.p0, camera);
+    const ray1 = backproject(lineSegment.p1, camera);
 
+    const p0 = ray_plane(vec3.create(), ray0, scene.plane);
+    const p1 = ray_plane(vec3.create(), ray1, scene.plane);
+
+    // HACK: Just grav uv from x,z in projected point
+    // Only works when plane = [0, 1, 0, 0]. uv should be 
+    // projected onto orthonogal 3d U, V vectors _in_ the plane.
+    const uv0 = vec2.fromValues(p0[0], p0[2]);
+    const uv1 = vec2.fromValues(p1[0], p1[2]);
   }  
 
 
