@@ -132,12 +132,6 @@ function render(canvas, camera, scene) {
     
     // Clip with screen edges
     const lineSegment = clip_to_ndc(line2d);
-    //console.log(lineSegment.p0, lineSegment.p1);
-
-    /*ctx.beginPath();
-    ctx.moveTo(lineSegment.p0[0], lineSegment.p0[1]);
-    ctx.lineTo(lineSegment.p1[0], lineSegment.p1[1]);
-    ctx.stroke();*/
 
     const ray0 = backproject(lineSegment.p0, camera);
     const ray1 = backproject(lineSegment.p1, camera);
@@ -168,27 +162,7 @@ function render(canvas, camera, scene) {
       ctx.lineTo(p[0], p[1] - h);
     }
     ctx.stroke();
-  }  
-
-
-  /*
-  var projection = mat4.create();
-  mat4.multiply(projection, camera.projection, camera.pose);
-  var vertices = [
-    vec3.fromValues(0, 0, 0),
-    vec3.fromValues(1, 0, 0),
-    vec3.fromValues(1, 0, 1),
-    vec3.fromValues(0, 0, 1),
-  ];
-  const r = 3;
-  var screen = vec3.create();
-  for (var i = 0; i < vertices.length; i++) {
-    vec3.transformMat4(screen, vertices[i], projection);
-    ctx.fillRect(
-      canvas.width * (0.5 + screen[0] / screen[2]),
-      canvas.height * (0.5 - screen[1] / screen[2]),
-      r, r);
-  }*/
+  }
 }
 
 function gaussian(mean, sigma) {
