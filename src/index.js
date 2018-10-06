@@ -67,11 +67,11 @@ function aax_line_line(line, x) {
 }
 
 // Line intersection with axis aligned line, e.g. y=-1
-function aay_line_line(line, y) {
+/*function aay_line_line(line, y) {
   const px = line.p[0], py = line.p[1];
   const ux = line.u[0], uy = line.u[1];
   return vec2.fromValues(px + ux * (y - py) / uy, y);
-}
+}*/
 
 function clip_to_ndc(line) {
   // TODO: Also clip agaist screen top and bottom.
@@ -116,7 +116,7 @@ function backproject(screen, camera) {
   return {
     o: origin_world,
     d: vec3.normalize(vec3.create(), ray_world),
-  } 
+  };
 }
 
 // camera - camera matrix
@@ -158,7 +158,7 @@ function render(canvas, camera, scene) {
     var total = mat4.create();
     mat4.multiply(total, camera.projection, camera.pose);
     const above0_world = extend(vec3.add(vec3.create(), p0, scene.plane));
-    const above0_clip = vec4.transformMat4(vec4.create(), above0_world, total)
+    const above0_clip = vec4.transformMat4(vec4.create(), above0_world, total);
     const above0 = ndc(vec3.create(), above0_clip);
     const up0 = vec2.subtract(vec2.create(), above0, lineSegment.p0);
 
