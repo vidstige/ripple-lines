@@ -36,7 +36,7 @@ function plane_plane_intersection(p1, p2) {
   const d1 = p1[3];
   const normal2 = vec3.clone(p2);
   const d2 = p2[3];
-  // Find the normal of the plane - u
+  // Find the normal of the line - u
   const u = vec3.cross(vec3.create(), p1, p2);
 
   // Find a point on the line
@@ -53,21 +53,22 @@ function plane_plane_intersection(p1, p2) {
   };
 }
 
-// Axis aligned line line intersection, e.g. x=-1
+// Line intersection with axis aligned line, e.g. x=-1
 function aax_line_line(line, x) {
   const px = line.p[0], py = line.p[1];
   const ux = line.u[0], uy = line.u[1];
   return vec2.fromValues(x, py + uy * (x - px) / ux);
 }
 
-// Axis aligned line line intersection, e.g. y=-1
-function aay_line_line(line, x) {
+// Line intersection with axis aligned line, e.g. y=-1
+function aay_line_line(line, y) {
   const px = line.p[0], py = line.p[1];
   const ux = line.u[0], uy = line.u[1];
   return vec2.fromValues(px + ux * (y - py) / uy, y);
 }
 
 function clip_to_ndc(line) {
+  // TODO: Also clip agaist screen top and bottom.
   const left = aax_line_line(line, -1);
   const right = aax_line_line(line, 1);
   return {p0: left, p1: right};
@@ -146,20 +147,37 @@ function render(canvas, camera, scene) {
     const uv0 = vec2.fromValues(p0[0], p0[2]);
     const uv1 = vec2.fromValues(p1[0], p1[2]);
 
+    // Find normal of plane in screen space
+    var total = mat4.create();
+    mat4.multiply(total, camera.projection, camera.pose);
+    const above0_world = extend(vec3.add(vec3.create(), p0, scene.plane));
+    const above0_clip = vec4.transformMat4(vec4.create(), above0_world, total)
+    const above0 = ndc(vec3.create(), above0_clip);
+    const up0 = vec2.subtract(vec2.create(), above0, lineSegment.p0);
+
+    const above1_world = extend(vec3.add(vec3.create(), p1, scene.plane));
+    const above1 = ndc(vec3.create(), vec4.transformMat4(vec4.create(), above1_world, total));
+    const up1 = vec2.subtract(vec2.create(), above1, lineSegment.p1);
+  
     // interpolate linesegment and uv pairs
     var p = vec2.create();
     var uv = vec2.create();
+    var up = vec2.create();
 
-    var h = scene.heightmap(uv0);
-    ctx.moveTo(lineSegment.p0[0], lineSegment.p0[1] - h);
+    var plot = vec2.create();
+    vec2.scaleAndAdd(plot, lineSegment.p0, up0, scene.heightmap(uv0));
+    ctx.moveTo(plot[0], plot[1]);
 
     const n = 128;
     for (var j = 0; j < n; j++) {
       const t = (j + 1) / n;
       vec2.lerp(p, lineSegment.p0, lineSegment.p1, t);
       vec2.lerp(uv, uv0, uv1, t);
-      h = scene.heightmap(uv);
-      ctx.lineTo(p[0], p[1] - h);
+      vec2.lerp(up, up0, up1, t);
+      //h = scene.heightmap(uv);
+      //ctx.lineTo(p[0], p[1] - h);
+      vec2.scaleAndAdd(plot, p, up, scene.heightmap(uv));
+      ctx.lineTo(plot[0], plot[1]);
     }
   }
   ctx.stroke();
@@ -185,7 +203,7 @@ function ready() {
   const camera = {projection, pose};
   const scene = {
     heightmap: gaussian(vec2.fromValues(0, -0.2), 0.030),
-    plane: vec4.fromValues(0, 1, 0, 0)};
+    plane: vec4.fromValues(0, -1, 0, 0)};
   render(canvas, camera, scene);
 }
 
