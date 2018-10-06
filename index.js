@@ -119,6 +119,7 @@ function render(canvas, camera, scene) {
   ctx.transform(canvas.width/2, 0, 0, canvas.height/2, canvas.width/2, canvas.height/2);
   ctx.lineWidth = 1 / canvas.height;
 
+  ctx.beginPath();
   for (var z = -4; z < 0; z += 0.25) {
     // Construct plane parallel to camera
     var z_plane = vec4.fromValues(0, 0, 1, z);
@@ -146,7 +147,6 @@ function render(canvas, camera, scene) {
     const uv1 = vec2.fromValues(p1[0], p1[2]);
 
     // interpolate linesegment and uv pairs
-    ctx.beginPath();
     var p = vec2.create();
     var uv = vec2.create();
 
@@ -161,8 +161,8 @@ function render(canvas, camera, scene) {
       h = scene.heightmap(uv);
       ctx.lineTo(p[0], p[1] - h);
     }
-    ctx.stroke();
   }
+  ctx.stroke();
 }
 
 function gaussian(mean, sigma) {
