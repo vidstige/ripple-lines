@@ -118,9 +118,10 @@ function backproject(screen, camera) {
 function render(canvas, camera, scene) {
   const ctx = canvas.getContext("2d");
   ctx.transform(canvas.width/2, 0, 0, canvas.height/2, canvas.width/2, canvas.height/2);
-  ctx.lineWidth = 1 / canvas.height;
+  
+  ctx.lineWidth = 2 / canvas.height;
+  ctx.fillStyle = "white";
 
-  ctx.beginPath();
   for (var z = -4; z < 0; z += 0.25) {
     // Construct plane parallel to camera
     var z_plane = vec4.fromValues(0, 0, 1, z);
@@ -163,8 +164,10 @@ function render(canvas, camera, scene) {
     var p = vec2.create();
     var uv = vec2.create();
     var up = vec2.create();
-
     var plot = vec2.create();
+    
+    ctx.beginPath();
+
     vec2.scaleAndAdd(plot, lineSegment.p0, up0, scene.heightmap(uv0));
     ctx.moveTo(plot[0], plot[1]);
 
@@ -174,19 +177,21 @@ function render(canvas, camera, scene) {
       vec2.lerp(p, lineSegment.p0, lineSegment.p1, t);
       vec2.lerp(uv, uv0, uv1, t);
       vec2.lerp(up, up0, up1, t);
-      //h = scene.heightmap(uv);
-      //ctx.lineTo(p[0], p[1] - h);
       vec2.scaleAndAdd(plot, p, up, scene.heightmap(uv));
       ctx.lineTo(plot[0], plot[1]);
     }
+    ctx.stroke();
+    ctx.lineTo(1, 1);
+    ctx.lineTo(-1, 1);
+    ctx.closePath();
+    ctx.fill();
   }
-  ctx.stroke();
 }
 
 function gaussian(mean, sigma) {
   return function (p) {
     var tmp = vec2.subtract(vec2.create(), p, mean);
-    return 0.5 * Math.exp(-vec2.dot(tmp, tmp) / (2 * sigma * sigma));
+    return 0.3 * Math.exp(-vec2.dot(tmp, tmp) / (2 * sigma * sigma));
   };
 }
 
@@ -202,7 +207,7 @@ function ready() {
   const canvas = document.getElementById('target');
   const camera = {projection, pose};
   const scene = {
-    heightmap: gaussian(vec2.fromValues(0, -0.2), 0.030),
+    heightmap: gaussian(vec2.fromValues(0, -0.19), 0.030),
     plane: vec4.fromValues(0, -1, 0, 0)};
   render(canvas, camera, scene);
 }
