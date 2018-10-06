@@ -1,5 +1,5 @@
-# wave-123
-Simple javascript that plots random mountain range.
+# ripple-lines
+Javascript that draws heightmap using lines.
 
 ![Screenshot 1](screenshots/1.png "Mountain range")
 
@@ -10,4 +10,3 @@ npm start
 
 ## Author
 Samuel Carlsson
-
