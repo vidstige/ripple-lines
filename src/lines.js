@@ -123,7 +123,12 @@ function backproject(screen, camera) {
 // scene - plane (e.g. y = 0) and height map function f(u, v)
 function render(canvas, camera, scene) {
   const ctx = canvas.getContext("2d");
-  ctx.transform(canvas.width/2, 0, 0, canvas.height/2, canvas.width/2, canvas.height/2);
+  if (ctx.transform.setMatrix) {
+    // pure image hack
+    ctx.transform.setMatrix([canvas.width/2, 0, 0, canvas.height/2, canvas.width/2, canvas.height/2]);
+  } else {
+    ctx.transform(canvas.width/2, 0, 0, canvas.height/2, canvas.width/2, canvas.height/2);
+  }
   
   ctx.lineWidth = 2 / canvas.height;
   ctx.fillStyle = "white";
