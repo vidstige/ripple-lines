@@ -127,9 +127,10 @@ function render(canvas, camera, scene) {
     // pure image hack
     ctx.transform.setMatrix([canvas.width/2, 0, 0, canvas.height/2, canvas.width/2, canvas.height/2]);
   } else {
-    ctx.transform(canvas.width/2, 0, 0, canvas.height/2, canvas.width/2, canvas.height/2);
+    ctx.setTransform(canvas.width/2, 0, 0, canvas.height/2, canvas.width/2, canvas.height/2);
   }
-  
+  ctx.clearRect(-1, -1, 2, 2);
+
   ctx.lineWidth = 2 / canvas.height;
   ctx.fillStyle = "white";
 
@@ -182,7 +183,7 @@ function render(canvas, camera, scene) {
     vec2.scaleAndAdd(plot, lineSegment.p0, up0, scene.heightmap(uv0));
     ctx.moveTo(plot[0], plot[1]);
 
-    const n = 128;
+    const n = 64;
     for (var j = 0; j < n; j++) {
       const t = (j + 1) / n;
       vec2.lerp(p, lineSegment.p0, lineSegment.p1, t);
