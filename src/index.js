@@ -1,6 +1,6 @@
 const lines = require('./lines.js');
 const glMatrix = require('gl-matrix');
-const vec2 = glMatrix.vec2;
+//const vec2 = glMatrix.vec2;
 const vec3 = glMatrix.vec3;
 const vec4 = glMatrix.vec4;
 const mat4 = glMatrix.mat4;
