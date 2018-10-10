@@ -106,6 +106,7 @@ function backproject(screen, camera) {
   
   var total_inv = mat4.create();
   mat4.invert(total_inv, total);
+  //mat4.transpose(total_inv, total_inv);
   //const ray_eye = inverse(total) * ray_clip;
   const ray_world = vec4.create();
   vec3.transformMat4(ray_world, ray_clip, total_inv);
@@ -119,6 +120,28 @@ function backproject(screen, camera) {
   };
 }
 
+function rgb(r, g, b) {
+  return 'rgb(' + Math.floor(255*r) + ',' + Math.floor(255*g) + ',' + Math.floor(255*b) + ')';
+}
+
+// For debugging
+function draw_heightmap(ctx, w, h, camera, scene) {
+  for (var x = 0; x < w; x++) {
+    for (var y = 0; y < w; y++) {
+      const sx = 2 * x/w - 1;
+      const sy = 2 * y/h - 1;
+      const ray = backproject(vec2.fromValues(
+        sx + 0.5/w,
+        sy + 0.5/h), camera);
+      const p = ray_plane(vec3.create(), ray, scene.plane);
+      const uv = vec2.fromValues(p[0], p[2]);
+      const i = scene.heightmap(uv);
+      ctx.fillStyle = rgb(i, 0, i);
+      ctx.fillRect(sx, sy, 2/w, 2/h);
+    }
+  }
+}
+
 // camera - camera matrix
 // scene - plane (e.g. y = 0) and height map function f(u, v)
 function render(canvas, camera, scene) {
@@ -129,12 +152,16 @@ function render(canvas, camera, scene) {
   } else {
     ctx.setTransform(canvas.width/2, 0, 0, canvas.height/2, canvas.width/2, canvas.height/2);
   }
+  ctx.setTransform(canvas.width/2, 0, 0, canvas.height/2, canvas.width/2, canvas.height/2);
   ctx.clearRect(-1, -1, 2, 2);
+
+  //draw_heightmap(ctx, 64, 48, camera, scene);
+
 
   ctx.lineWidth = 2 / canvas.height;
   ctx.fillStyle = "white";
 
-  for (var z = -4; z < 0; z += 0.25) {
+  for (var z = -8; z < -1; z += 0.5) {
     // Construct plane parallel to camera
     var z_plane = vec4.fromValues(0, 0, 1, z);
 
@@ -203,7 +230,7 @@ function render(canvas, camera, scene) {
 function gaussian(mean, sigma) {
   return function (p) {
     var tmp = vec2.subtract(vec2.create(), p, mean);
-    return 0.3 * Math.exp(-vec2.dot(tmp, tmp) / (2 * sigma * sigma));
+    return 0.5 * Math.exp(-vec2.dot(tmp, tmp) / (2 * sigma * sigma));
   };
 }
 
