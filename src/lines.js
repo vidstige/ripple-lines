@@ -120,7 +120,7 @@ function backproject(screen, camera) {
   };
 }
 
-function rgb(r, g, b) {
+/*function rgb(r, g, b) {
   return 'rgb(' + Math.floor(255*r) + ',' + Math.floor(255*g) + ',' + Math.floor(255*b) + ')';
 }
 
@@ -140,7 +140,7 @@ function draw_heightmap(ctx, w, h, camera, scene) {
       ctx.fillRect(sx, sy, 2/w, 2/h);
     }
   }
-}
+}*/
 
 // camera - camera matrix
 // scene - plane (e.g. y = 0) and height map function f(u, v)
@@ -152,7 +152,6 @@ function render(canvas, camera, scene) {
   } else {
     ctx.setTransform(canvas.width/2, 0, 0, canvas.height/2, canvas.width/2, canvas.height/2);
   }
-  ctx.setTransform(canvas.width/2, 0, 0, canvas.height/2, canvas.width/2, canvas.height/2);
   ctx.clearRect(-1, -1, 2, 2);
 
   //draw_heightmap(ctx, 64, 48, camera, scene);
