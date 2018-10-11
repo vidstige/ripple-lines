@@ -120,12 +120,20 @@ function backproject(screen, camera) {
   };
 }
 
-/*function rgb(r, g, b) {
+function rgb(r, g, b) {
   return 'rgb(' + Math.floor(255*r) + ',' + Math.floor(255*g) + ',' + Math.floor(255*b) + ')';
 }
 
 // For debugging
-function draw_heightmap(ctx, w, h, camera, scene) {
+function draw_heightmap(canvas, w, h, camera, scene) {
+  const ctx = canvas.getContext("2d");
+  if (ctx.transform.setMatrix) {
+    // pure image hack
+    ctx.transform.setMatrix([canvas.width/2, 0, 0, canvas.height/2, canvas.width/2, canvas.height/2]);
+  } else {
+    ctx.setTransform(canvas.width/2, 0, 0, canvas.height/2, canvas.width/2, canvas.height/2);
+  }
+
   for (var x = 0; x < w; x++) {
     for (var y = 0; y < w; y++) {
       const sx = 2 * x/w - 1;
@@ -140,11 +148,13 @@ function draw_heightmap(ctx, w, h, camera, scene) {
       ctx.fillRect(sx, sy, 2/w, 2/h);
     }
   }
-}*/
+}
 
 // camera - camera matrix
 // scene - plane (e.g. y = 0) and height map function f(u, v)
-function render(canvas, camera, scene) {
+function render(canvas, camera, scene, options) {
+  const z_min = options.z ? options.z.min : -8;
+  const z_max = options.z ? options.z.max : -1;
   const ctx = canvas.getContext("2d");
   if (ctx.transform.setMatrix) {
     // pure image hack
@@ -160,7 +170,7 @@ function render(canvas, camera, scene) {
   ctx.lineWidth = 2 / canvas.height;
   ctx.fillStyle = "white";
 
-  for (var z = -8; z < -1; z += 0.5) {
+  for (var z = z_min; z < z_max; z += 0.5) {
     // Construct plane parallel to camera
     var z_plane = vec4.fromValues(0, 0, 1, z);
 
@@ -235,5 +245,6 @@ function gaussian(mean, sigma) {
 
 module.exports = {
   gaussian: gaussian,
-  render: render
+  render: render,
+  draw_heightmap: draw_heightmap
 };
