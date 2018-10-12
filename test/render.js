@@ -26,7 +26,7 @@ function main() {
     plane: vec4.fromValues(0, -1, 0, 0)};
   lines.render(canvas, camera, scene);
 
-  const destination = 'screenshots/2.png';
+  const destination = 'renders/1.png';
   pureImage.encodePNGToStream(canvas, fs.createWriteStream(destination)).then(() => {
     console.log("Wrote " + destination);
   }).catch((e)=>{
