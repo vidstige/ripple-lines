@@ -11,8 +11,8 @@ const lines = require('../src/lines.js');
 
 function main() {
   var up = vec3.fromValues(0, 1, 0);
-  var eye = vec3.fromValues(0, 0.4, -2);
-  var center = vec3.fromValues(0, 0, 0);
+  var eye = vec3.fromValues(0, 0.75, -2.45);
+  var center = vec3.fromValues(0, 0.6, 0);
   var pose = mat4.create();
   mat4.lookAt(pose, eye, center, up);
   var projection = mat4.create();
@@ -22,7 +22,7 @@ function main() {
 
   const camera = {projection, pose};
   const scene = {
-    heightmap: lines.gaussian(vec2.fromValues(0, -0.19), 0.030),
+    heightmap: lines.gaussian(vec2.fromValues(0, 0), 0.030),
     plane: vec4.fromValues(0, -1, 0, 0)};
   lines.render(canvas, camera, scene);
 
