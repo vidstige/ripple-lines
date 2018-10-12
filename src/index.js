@@ -8,7 +8,7 @@ const vec4 = glMatrix.vec4;
 const mat4 = glMatrix.mat4;
 
 function square(uv) {
-  const s = 0.01;
+  const s = 0.03;
   const u = uv[0], v = uv[1];
   if (u > -s && u < s && v > -s && v < s) {
     return 0.1;
@@ -18,10 +18,8 @@ function square(uv) {
 
 function ready() {
   var up = vec3.fromValues(0, 1, 0);
-  var center = vec3.fromValues(0, -0.5, 0);
   var pose = mat4.create();
   var projection = mat4.create();
-  mat4.perspective(projection, 1.4, 640/480, 0.1, 3);
 
   const scene = {
     //heightmap: lines.gaussian(vec2.fromValues(0, 0), 0.04),
@@ -29,20 +27,24 @@ function ready() {
     plane: vec4.fromValues(0, -1, 0, 0)};
 
   var tweaking = {
-    height: 0.4,
-    z_min: -7,
+    fov: 1.3,
+    height: 0.75,
+    center_height: 0.6,
+    z_min: -9,
     z_max: 0,
-    angle: 0,
-    distance: 0.2,
+    angle: 60,
+    distance: 2.45,
     lines: true
   };
   var gui = new dat.gui.GUI();
   gui.remember(tweaking);
-  gui.add(tweaking, 'height', 0, 2).step(0.05);
+  gui.add(tweaking, 'fov', 0.2, 4).step(0.1);
+  gui.add(tweaking, 'height', 0, 4).step(0.05);
+  gui.add(tweaking, 'center_height', -4, 3).step(0.1);
   gui.add(tweaking, 'z_min', -12, -2).step(0.5);
   gui.add(tweaking, 'z_max', -2, 0).step(0.05);
   gui.add(tweaking, 'angle', 0, 360).step(1);
-  gui.add(tweaking, 'distance', 0.5, 5).step(0.05);
+  gui.add(tweaking, 'distance', 0.2, 5).step(0.05);
   gui.add(tweaking, 'lines');
 
   const canvas = document.getElementById('target');
@@ -52,7 +54,9 @@ function ready() {
       tweaking.distance * Math.sin(a),
       tweaking.height,
       tweaking.distance * Math.cos(a));
+    const center = vec3.fromValues(0, tweaking.center_height, 0);
     mat4.lookAt(pose, eye, center, up);
+    mat4.perspective(projection, tweaking.fov, 640/480, 0.1, 3);
     const camera = {projection, pose};
     
     if (tweaking.lines) {
