@@ -153,6 +153,7 @@ function draw_heightmap(canvas, w, h, camera, scene) {
 // camera - camera matrix
 // scene - plane (e.g. y = 0) and height map function f(u, v)
 function render(canvas, camera, scene, options) {
+  options = options || {};
   const z_min = options.z ? options.z.min : -8;
   const z_max = options.z ? options.z.max : -1;
   const ctx = canvas.getContext("2d");
@@ -163,9 +164,6 @@ function render(canvas, camera, scene, options) {
     ctx.setTransform(canvas.width/2, 0, 0, canvas.height/2, canvas.width/2, canvas.height/2);
   }
   ctx.clearRect(-1, -1, 2, 2);
-
-  //draw_heightmap(ctx, 64, 48, camera, scene);
-
 
   ctx.lineWidth = 2 / canvas.height;
   ctx.fillStyle = "white";
