@@ -237,7 +237,7 @@ function render(canvas, camera, scene, options) {
 function gaussian(mean, sigma) {
   return function (p) {
     var tmp = vec2.subtract(vec2.create(), p, mean);
-    return 0.5 * Math.exp(-vec2.dot(tmp, tmp) / (2 * sigma * sigma));
+    return 0.2 * Math.exp(-vec2.dot(tmp, tmp) / (2 * sigma * sigma));
   };
 }
 

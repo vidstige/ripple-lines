@@ -2,10 +2,29 @@ const lines = require('./lines.js');
 const glMatrix = require('gl-matrix');
 const dat = require('dat.gui'); 
 
-//const vec2 = glMatrix.vec2;
+const vec2 = glMatrix.vec2;
 const vec3 = glMatrix.vec3;
 const vec4 = glMatrix.vec4;
 const mat4 = glMatrix.mat4;
+
+function mountains(n) {
+  const s = 0.1;
+  const peaks = [];
+  for (var i = 0; i < n; i++) {
+    const mean = vec2.subtract(vec2.create(),
+      vec2.random(vec2.create(), s),
+      vec2.fromValues(s/2, s/2));
+    const sigma = 0.03;
+    peaks.push(lines.gaussian(mean, sigma))
+  }
+  return function(uv) {
+    var h = 0;
+    for (var i = 0; i < peaks.length; i++) {
+      h += peaks[i](uv);
+    }
+    return h;
+  }
+}
 
 function square(uv) {
   const s = 0.03;
@@ -23,7 +42,8 @@ function ready() {
 
   const scene = {
     //heightmap: lines.gaussian(vec2.fromValues(0, 0), 0.04),
-    heightmap: square,
+    //heightmap: square,
+    heightmap: mountains(3),
     plane: vec4.fromValues(0, -1, 0, 0)};
 
   var tweaking = {
