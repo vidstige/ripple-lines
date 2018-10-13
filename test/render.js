@@ -8,6 +8,7 @@ const vec4 = glMatrix.vec4;
 const mat4 = glMatrix.mat4;
 
 const lines = require('../src/lines.js');
+const heightmaps = require('../src/heightmaps.js');
 
 function main() {
   var up = vec3.fromValues(0, 1, 0);
@@ -22,7 +23,7 @@ function main() {
 
   const camera = {projection, pose};
   const scene = {
-    heightmap: lines.gaussian(vec2.fromValues(0, 0), 0.030),
+    heightmap: heightmaps.gaussian(vec2.fromValues(0, 0), 0.030),
     plane: vec4.fromValues(0, -1, 0, 0)};
   lines.render(canvas, camera, scene);
 
