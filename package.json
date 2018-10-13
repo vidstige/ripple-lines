@@ -16,7 +16,7 @@
     "start": "parcel index.html",
     "lint": "eslint src/*.js",
     "build": "parcel build index.html",
-    "test": "node test/render.js"
+    "test": "node test/static1.js"
   },
   "repository": {
     "type": "git",
