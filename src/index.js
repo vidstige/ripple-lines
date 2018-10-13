@@ -1,4 +1,4 @@
-const lines = require('./lines.js');
+const lines = require('./renderer.js');
 const heightmaps = require('./heightmaps');
 const glMatrix = require('gl-matrix');
 const dat = require('dat.gui'); 

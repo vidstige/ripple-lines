@@ -7,7 +7,7 @@ const vec3 = glMatrix.vec3;
 const vec4 = glMatrix.vec4;
 const mat4 = glMatrix.mat4;
 
-const lines = require('../src/lines.js');
+const lines = require('../src/renderer.js');
 const heightmaps = require('../src/heightmaps.js');
 
 function main() {
