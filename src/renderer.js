@@ -1,4 +1,6 @@
 const glMatrix = require('gl-matrix');
+const intersect = require('./intersect.js');
+
 const vec2 = glMatrix.vec2;
 const vec3 = glMatrix.vec3;
 const vec4 = glMatrix.vec4;
@@ -37,46 +39,10 @@ function project_line(line, M) {
   };
 }
 
-function plane_plane_intersection(p1, p2) {
-  const normal1 = vec3.clone(p1);
-  const d1 = p1[3];
-  const normal2 = vec3.clone(p2);
-  const d2 = p2[3];
-  // Find the normal of the line - u
-  const u = vec3.cross(vec3.create(), p1, p2);
-
-  // Find a point on the line
-  var p = 
-    vec3.cross(vec3.create(),
-      vec3.subtract(vec3.create(),
-        vec3.scale(vec3.create(), normal1, d2),
-        vec3.scale(vec3.create(), normal2, d1)),
-      u);
-  p = vec3.scale(vec3.create(), p, vec3.squaredLength(u));
-  return {
-    p: p,
-    u: u,
-  };
-}
-
-// Line intersection with axis aligned line, e.g. x=-1
-function aax_line_line(line, x) {
-  const px = line.p[0], py = line.p[1];
-  const ux = line.u[0], uy = line.u[1];
-  return vec2.fromValues(x, py + uy * (x - px) / ux);
-}
-
-// Line intersection with axis aligned line, e.g. y=-1
-/*function aay_line_line(line, y) {
-  const px = line.p[0], py = line.p[1];
-  const ux = line.u[0], uy = line.u[1];
-  return vec2.fromValues(px + ux * (y - py) / uy, y);
-}*/
-
 function clip_to_ndc(line) {
   // TODO: Also clip agaist screen top and bottom.
-  const left = aax_line_line(line, -1);
-  const right = aax_line_line(line, 1);
+  const left = intersect.vertical_line_line(line, -1);
+  const right = intersect.vertical_line_line(line, 1);
   return {p0: left, p1: right};
 }
 
@@ -86,15 +52,6 @@ function transform_plane(out, plane, M) {
   mat4.transpose(tmp, tmp);
   vec4.transformMat4(out, plane, tmp);
   return out;
-}
-
-// Computes ray-plane intersection
-function ray_plane(out, ray, plane) {
-  const plane_normal = vec3.copy(vec3.create(), plane);
-  const d = plane[3];
-  //const t = -( N.O + d ) / ( N.D );
-  const t = -( vec3.dot(plane_normal, ray.o) + d ) / vec3.dot(plane_normal, ray.d);
-  return vec3.scaleAndAdd(out, ray.o, ray.d, t);
 }
 
 function backproject(screen, camera) {
@@ -141,7 +98,7 @@ function draw_heightmap(canvas, w, h, camera, scene) {
       const ray = backproject(vec2.fromValues(
         sx + 0.5/w,
         sy + 0.5/h), camera);
-      const p = ray_plane(vec3.create(), ray, scene.plane);
+      const p = intersect.ray_plane(vec3.create(), ray, scene.plane);
       const uv = vec2.fromValues(p[0], p[2]);
       const i = scene.heightmap(uv);
       ctx.fillStyle = rgb(i, 0, i);
@@ -174,7 +131,7 @@ function render(canvas, camera, scene, options) {
 
     // Intersect scene plane and z plane
     const plane = transform_plane(vec4.create(), scene.plane, camera.pose);
-    const line3d = plane_plane_intersection(plane, z_plane);
+    const line3d = intersect.plane_plane(plane, z_plane);
 
     // Project line
     const line2d = project_line(line3d, camera.projection);
@@ -185,8 +142,8 @@ function render(canvas, camera, scene, options) {
     const ray0 = backproject(lineSegment.p0, camera);
     const ray1 = backproject(lineSegment.p1, camera);
 
-    const p0 = ray_plane(vec3.create(), ray0, scene.plane);
-    const p1 = ray_plane(vec3.create(), ray1, scene.plane);
+    const p0 = intersect.ray_plane(vec3.create(), ray0, scene.plane);
+    const p1 = intersect.ray_plane(vec3.create(), ray1, scene.plane);
 
     // HACK: Just grab uv from x,z in projected point
     // Only works when plane = [0, 1, 0, 0]. uv should be 
