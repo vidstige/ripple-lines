@@ -84,12 +84,7 @@ function rgb(r, g, b) {
 // For debugging
 function draw_heightmap(canvas, w, h, camera, scene) {
   const ctx = canvas.getContext("2d");
-  if (ctx.transform.setMatrix) {
-    // pure image hack
-    ctx.transform.setMatrix([canvas.width/2, 0, 0, canvas.height/2, canvas.width/2, canvas.height/2]);
-  } else {
-    ctx.setTransform(canvas.width/2, 0, 0, canvas.height/2, canvas.width/2, canvas.height/2);
-  }
+  setTransform(ctx, canvas.width/2, 0, 0, canvas.height/2, canvas.width/2, canvas.height/2);
 
   for (var x = 0; x < w; x++) {
     for (var y = 0; y < w; y++) {
@@ -107,6 +102,15 @@ function draw_heightmap(canvas, w, h, camera, scene) {
   }
 }
 
+function setTransform(ctx, a, b, c, d, e, f) {
+  if (ctx.transform.setMatrix) {
+    // pure image hack
+    ctx.transform.setMatrix([a, b, c, d, e, f]);
+  } else {
+    ctx.setTransform(a, b, c, d, e, f);
+  }
+}
+
 // camera - camera matrix
 // scene - plane (e.g. y = 0) and height map function f(u, v)
 function render(canvas, camera, scene, options) {
@@ -114,15 +118,9 @@ function render(canvas, camera, scene, options) {
   const z_min = options.z ? options.z.min : -8;
   const z_max = options.z ? options.z.max : -1;
   const ctx = canvas.getContext("2d");
-  if (ctx.transform.setMatrix) {
-    // pure image hack
-    ctx.transform.setMatrix([canvas.width/2, 0, 0, canvas.height/2, canvas.width/2, canvas.height/2]);
-  } else {
-    ctx.setTransform(canvas.width/2, 0, 0, canvas.height/2, canvas.width/2, canvas.height/2);
-  }
   ctx.clearRect(-1, -1, 2, 2);
 
-  ctx.lineWidth = 2 / canvas.height;
+  //ctx.lineWidth = 2 / canvas.height;
   ctx.fillStyle = "white";
 
   for (var z = z_min; z < z_max; z += 0.5) {
@@ -172,6 +170,8 @@ function render(canvas, camera, scene, options) {
     ctx.beginPath();
 
     vec2.scaleAndAdd(plot, lineSegment.p0, up0, scene.heightmap(uv0));
+
+    setTransform(ctx, canvas.width/2, 0, 0, canvas.height/2, canvas.width/2, canvas.height/2);
     ctx.moveTo(plot[0], plot[1]);
 
     const n = 64;
@@ -183,7 +183,9 @@ function render(canvas, camera, scene, options) {
       vec2.scaleAndAdd(plot, p, up, scene.heightmap(uv));
       ctx.lineTo(plot[0], plot[1]);
     }
+    setTransform(ctx, 1, 0, 0, 1, 0, 0);
     ctx.stroke();
+    setTransform(ctx, canvas.width/2, 0, 0, canvas.height/2, canvas.width/2, canvas.height/2);
     ctx.lineTo(1, 1);
     ctx.lineTo(-1, 1);
     ctx.closePath();
