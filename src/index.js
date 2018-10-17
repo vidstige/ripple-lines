@@ -15,6 +15,7 @@ function ready() {
   const scene = {
     //heightmap: heightmaps.gaussian(vec2.fromValues(0, 0), 0.04),
     //heightmap: heightmaps.square,
+    //heightmap: heightmaps.checker(40),
     heightmap: heightmaps.mountains(3),
     plane: vec4.fromValues(0, -1, 0, 0)};
 

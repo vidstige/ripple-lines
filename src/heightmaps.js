@@ -37,4 +37,14 @@ function square(uv) {
   return 0;
 }
 
-module.exports = {gaussian, square, mountains};
+function checker(size) {
+  return function (uv) {
+    const u = uv[0], v = uv[1];
+    if (Math.round(u * size) % 2 == 0 || Math.round(v * size) % 2 == 1) {
+      return 0.1;
+    }
+    return 0;
+  };
+}
+
+module.exports = {gaussian, square, checker, mountains};
